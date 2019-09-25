@@ -59,7 +59,7 @@ def exec_op(arr, i, op):
     n1 = int(arr[i-1])
     n2 = int(arr[i+1])
     tmp = str(op(n1, n2))
-    print(tmp)
+    # print(tmp)
     return [tmp]
 
 
@@ -78,7 +78,7 @@ def evaluate(exp):
             i, op = any_op(arr, OPERATORS1, LAMBDAS1)
             if op is not None:
                 arr = arr[:i-1] + exec_op(arr, i, op) + arr[i+2:]
-    print(arr[0])
+    # print(arr[0])
     return (arr[0])
 
 
@@ -91,10 +91,10 @@ def compute(exp):
             print("missing ending parenthese")
             exit(1)
         sub = exp[start+1:end]
-        print(sub)
+        # print(sub)
         exp = exp[:start] + evaluate(sub) + exp[end+1:]
-        print(exp)
-        print("--------------------")
+        # print(exp)
+        # print("--------------------")
         # getting next parenthese
         start = exp.rfind('(')
     
@@ -114,4 +114,4 @@ if __name__ == "__main__":
     checkCharacters(exp)
     # Evaluate the expression
     res = compute(exp)
-    print("The result is: {}".format(res))
+    print("{}".format(res))
