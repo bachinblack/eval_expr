@@ -1,5 +1,16 @@
 # eval_expr
-  
+
+This scripts takes a mathematical expression as a parameter and evaluates it.  
+The results are close to that of python's `eval()` function.  
+
+As with `eval()` division by zero is not checked for:  
+The truediv function will throw a ZeroDivisionError.  
+
+
+Notable differences:  
+    Stacking `+` or `-` operators results in an `Illegal stacking of operators` error.  
+
+
 Usage: ./eval_expr [expression]  
 
 ```shell

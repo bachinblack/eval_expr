@@ -1,34 +1,36 @@
 #!/usr/bin/python3
 import sys
 import re
+from operator import add, sub, mod, truediv, mul, pow
 
-NUMBERS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
 
-OPERATORS1 = ['+', '-', '%', '+-', '--', '%-']
+OPER1 = {
+    '+': add,
+    '-': sub,
+    '%': mod,
+    '--': add,
+    '++': add,
+    '+-': sub,
+    '-+': sub,
+    '%-': lambda a, b: mod(a, -b)
+}
 
-LAMBDAS1 = [
-    lambda a, b: a + b,
-    lambda a, b: a - b,
-    lambda a, b: a % b,
-    lambda a, b: a - b,
-    lambda a, b: a + b,
-    lambda a, b: a % -b,
-]
 
-OPERATORS2 = ['*', '/', '*-', '/-']
+OPER2 = {
+    '*': mul,
+    '**': pow,
+    '/': truediv,
+    '*-': lambda a, b: mul(a, -b),
+    '/-': lambda a, b: truediv(a, -b)
+}
 
-LAMBDAS2 = [
-    lambda a, b: a * b,
-    lambda a, b: a / b,
-    lambda a, b: a * -b,
-    lambda a, b: a / -b,
-]
 
-OPERATORS = OPERATORS1 + OPERATORS2
+OPERATORS = list(OPER1.keys()) + list(OPER2.keys())
 
-PARENTHESES = ['(', ')']
 
-LEGAL_CHARS = NUMBERS + OPERATORS + PARENTHESES
+LEGAL_CHARS = [
+    '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '(', ')'
+] + OPERATORS
 
 
 def checkCharacters(exp):
@@ -38,38 +40,57 @@ def checkCharacters(exp):
             exit(1)
 
 
-def any_op(arr, op_types, lambdas):
-    for i in range(0, len(arr)):
-        if arr[i] in op_types:
-            op = op_types.index(arr[i])
-            return i, lambdas[op]
-    return -1, None
+def exec_op(li, op, i):
+    try:
+        n1 = int(li[i-1])
+        n2 = int(li[i+1])
+        tmp = str(op(n1, n2))
+        return [tmp]
+    except ValueError:
+        print(
+            "Formatting error in expression. Last expression state was {}"
+            .format(li)
+        )
+        exit(1)
 
 
-def exec_op(arr, i, op):
-    n1 = int(arr[i-1])
-    n2 = int(arr[i+1])
-    tmp = str(op(n1, n2))
-    return [tmp]
+def compute_op(li, op_types):
+    i = 0
+    # Looping through li.
+    # Everytime an op is found, skipping one increment
+    while i < len(li):
+        if li[i] in op_types:
+            op = op_types[li[i]]
+            # Execute the operator and insert it in the array
+            exec_op(li, op, i)
+            li = li[:i-1] + exec_op(li, op, i) + li[i+2:]
+            # print(li)
+            continue
+        i += 1
+    return li
+
+
+def clean_ops(li):
+    for elem in li:
+        minus = False
+        # Check if the element is an illegal stacking of operators
+        # If so, trying to resolve it
+        if elem[0] in OPERATORS and elem not in OPERATORS:
+            for c in reversed(elem):
+                print("Illegal stacking of operators [{}]".format(elem))
+                exit(1)
+    return li
 
 
 def evaluate(exp):
     # String to array
-    arr = re.findall('[\d.]+|[+\-%\/*]+', exp)
-
-    i = 0
-    while i != -1:
-        # search for lvl 2 OPS
-        i, op = any_op(arr, OPERATORS2, LAMBDAS2)
-        if op is not None:
-            arr = arr[:i-1] + exec_op(arr, i, op) + arr[i+2:]
-            continue
-        # then for lvl 1
-        i, op = any_op(arr, OPERATORS1, LAMBDAS1)
-        if op is not None:
-            arr = arr[:i-1] + exec_op(arr, i, op) + arr[i+2:]
-    # print(arr[0])
-    return (arr[0])
+    li = re.findall('[\d.]+|[+\-%\/*]+', exp)
+    li = clean_ops(li)
+    # search for lvl 2 OPS (*, /)
+    li = compute_op(li, OPER2)
+    # then for lvl 1 OPS (+, -, %)
+    li = compute_op(li, OPER1)
+    return (li[0])
 
 
 def compute(exp):
@@ -81,7 +102,6 @@ def compute(exp):
             print("missing ending parenthese")
             exit(1)
         sub = exp[start+1:end]
-        # print(sub)
         exp = exp[:start] + evaluate(sub) + exp[end+1:]
         # print(exp)
         # print("--------------------")
@@ -102,6 +122,7 @@ if __name__ == "__main__":
 
     # Some security checks
     checkCharacters(exp)
+
     # Evaluate the expression
     res = compute(exp)
-    print("{}".format(res))
+    print(res)
