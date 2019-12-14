@@ -12,6 +12,7 @@ Notable differences:
 
 
 Usage: ./eval_expr [expression]  
+    -r, --recursive  solve the expression recursively  
 
 ```shell
 ./eval_expr "3+2"

@@ -103,7 +103,6 @@ def evaluate(exp, rec=False):
     li = re.findall('[\d.]+|[+\-%\/*]+', exp)
     li = clean_ops(li)
     if rec is True:
-        print("rec")
         # search for lvl 2 OPS (*, /)
         li = compute_op_rec(li, OPER2)
         # then for lvl 1 OPS (+, -, %)
